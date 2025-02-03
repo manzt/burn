@@ -69,7 +69,7 @@
 		globalThis.addEventListener("resize", restart);
 
 		{
-			let pane = new Pane();
+			let pane = new Pane().addFolder({ title: "Controls" });
 			let PARAMS = {
 				get interval() {
 					return fire.interval;
@@ -94,19 +94,20 @@
 					restart();
 				},
 			};
-			pane.addButton({ title: "Start" }).on("click", () => fire.start());
-			pane.addButton({ title: "Stop" }).on("click", () => fire.stop());
-			pane.addButton({ title: "Reset" }).on("click", () => {
-				PARAMS.scale = 3.5;
-				PARAMS.pallete = "doom";
-				fire.reset();
-			});
 			pane.addBinding(PARAMS, "interval", { min: 10, max: 90 });
 			pane.addBinding(PARAMS, "scale", { step: 0.5, min: 1, max: 30 });
 			pane.addBinding(PARAMS, "pallete", {
 				options: Object.fromEntries(
 					Object.keys(PALLETES).map((k) => [k, k]),
 				),
+			});
+			pane.addButton({ title: "Start" }).on("click", () => fire.start());
+			pane.addButton({ title: "Stop" }).on("click", () => fire.stop());
+			pane.addButton({ title: "Restart" }).on("click", () => fire.reset());
+			pane.addButton({ title: "Reset" }).on("click", () => {
+				localStorage.removeItem("pallete");
+				localStorage.removeItem("scale");
+				location.reload();
 			});
 		}
 	</script>
