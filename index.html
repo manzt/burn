@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>demo</title>
+		<style>
+			body {
+				padding: 0px;
+				margin: 0px;
+				background-color: black;
+				color: white;
+			}
+		</style>
+	</head>
+	<body id="root"></body>
+	<script type="module">
+		import burn from "./burn.js";
+
+		let canvas = document.createElement("canvas");
+		canvas.width = root.clientWidth;
+		canvas.height = 200;
+		root.appendChild(canvas);
+
+		globalThis.fire = burn(canvas);
+	</script>
+</html>

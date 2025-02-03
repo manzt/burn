@@ -1,0 +1,19 @@
+{
+	"name": "@manzt/burn",
+	"version": "0.0.0",
+	"license": "MIT",
+	"exports": "./burn.js",
+	"compilerOptions": {
+		"checkJs": true,
+		"lib": ["dom", "dom.iterable", "esnext"]
+	},
+	"fmt": {
+		"useTabs": true
+	},
+	"lint": {
+		"rules": {
+			"exclude": ["prefer-const"]
+		}
+	},
+	"lock": false
+}
