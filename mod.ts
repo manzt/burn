@@ -16,7 +16,7 @@ export type ColorPallete = ReadonlyArray<Color>;
 
 // @deno-fmt-ignore
 /** @internal */
-export const DEFAULT_PALLETE = [
+export const DEFAULT_PALLETE: ColorPallete = [
   [0x07,0x07,0x07],
   [0x1F,0x07,0x07],
   [0x2F,0x0F,0x07],
@@ -54,7 +54,7 @@ export const DEFAULT_PALLETE = [
   [0xDF,0xDF,0x9F],
   [0xEF,0xEF,0xC7],
   [0xFF,0xFF,0xFF]
-] satisfies ColorPallete;
+];
 
 class Renderer {
 	#scale: number;

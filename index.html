@@ -51,6 +51,7 @@
 		}
 
 		let fire = undefined;
+		let scale = Math.trunc(localStorage.getItem("scale") ?? 3.5);
 		let pallete = localStorage.getItem("pallete") ?? "doom";
 		let canvas = document.querySelector("canvas");
 
@@ -59,6 +60,7 @@
 			canvas.width = window.innerWidth;
 			canvas.height = window.innerHeight;
 			fire = globalThis.fire = burn(canvas, {
+				scale: scale,
 				pallete: resolvePallete(pallete),
 			});
 		}
@@ -83,17 +85,29 @@
 					localStorage.setItem("pallete", value);
 					fire.pallete = resolvePallete(value);
 				},
+				get scale() {
+					return scale;
+				},
+				set scale(value) {
+					scale = value;
+					localStorage.setItem("scale", value);
+					restart();
+				},
 			};
-			pane.addButton({ title: "Start" }).on("click", fire.start);
-			pane.addButton({ title: "Stop" }).on("click", fire.stop);
-			pane.addButton({ title: "Reset" }).on("click", fire.reset);
-			pane.addBinding(PARAMS, "interval", { min: 10, max: 100 });
+			pane.addButton({ title: "Start" }).on("click", () => fire.start());
+			pane.addButton({ title: "Stop" }).on("click", () => fire.stop());
+			pane.addButton({ title: "Reset" }).on("click", () => {
+				PARAMS.scale = 3.5;
+				PARAMS.pallete = "doom";
+				fire.reset();
+			});
+			pane.addBinding(PARAMS, "interval", { min: 10, max: 90 });
+			pane.addBinding(PARAMS, "scale", { step: 0.5, min: 1, max: 30 });
 			pane.addBinding(PARAMS, "pallete", {
 				options: Object.fromEntries(
 					Object.keys(PALLETES).map((k) => [k, k]),
 				),
 			});
 		}
-
 	</script>
 </html>
