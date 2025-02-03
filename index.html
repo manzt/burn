@@ -4,6 +4,10 @@
 		<meta charset="utf-8">
 		<title>demo</title>
 		<style>
+			html {
+				margin: 0px;
+				padding: 0px;
+			}
 			body {
 				background-color: black;
 				color: white;
@@ -16,24 +20,17 @@
 	<script type="module">
 		import { Pane } from "https://esm.sh/tweakpane@4";
 		import * as d3 from "https://esm.sh/d3@7";
-		let { default: burn } = await import("./mod.ts").catch((err) => {
-			console.warn(
-				"Vite dev server is not running. Falling back to the CDN version: `https://esm.sh/gh/manzt/burn/mod.ts`.\n\n" +
-					"Ensure Vite is running if you intended to use the local development build.",
-			);
-			return import("https://esm.sh/gh/manzt/burn/mod.ts");
-		});
 
-		let createPallete = (interpolate) =>
-			Array
-				.from({ length: 37 }, (_, i) => interpolate(i / 36))
-				.map((c) => {
-					let { r, g, b } = d3.color(c);
-					return [r, g, b];
-				});
+		let { default: burn, DEFAULT_PALLETE } = await import("./mod.ts")
+			.catch((err) => {
+				console.warn(
+					"Vite dev server is not running. Falling back to the CDN version: `https://esm.sh/gh/manzt/burn/mod.ts`.\n\n" +
+						"Ensure Vite is running if you intended to use the local development build.",
+				);
+				return import("https://esm.sh/gh/manzt/burn/mod.ts");
+			});
 
-		let pallete = "doom";
-		let palletes = {
+		let PALLETES = {
 			doom: null,
 			blues: d3.interpolateBlues,
 			greens: d3.interpolateGreens,
@@ -42,10 +39,32 @@
 			viridis: d3.interpolateViridis,
 		};
 
+		function resolvePallete(name) {
+			if (name === "doom") return DEFAULT_PALLETE;
+			let interpolate = PALLETES[pallete];
+			return Array
+				.from({ length: 37 }, (_, i) => interpolate(i / 36))
+				.map((c) => {
+					let { r, g, b } = d3.color(c);
+					return [r, g, b];
+				});
+		}
+
+		let fire = undefined;
+		let pallete = localStorage.getItem("pallete") ?? "doom";
 		let canvas = document.querySelector("canvas");
-		canvas.width = document.querySelector("body").clientWidth;
-		let fire = globalThis.fire = burn(canvas);
-		let defaultPallete = fire.pallete;
+
+		function restart() {
+			fire?.stop();
+			canvas.width = window.innerWidth;
+			canvas.height = window.innerHeight;
+			fire = globalThis.fire = burn(canvas, {
+				pallete: resolvePallete(pallete),
+			});
+		}
+
+		restart();
+		globalThis.addEventListener("resize", restart);
 
 		{
 			let pane = new Pane();
@@ -61,20 +80,20 @@
 				},
 				set pallete(value) {
 					pallete = value;
-					fire.pallete = value === "doom"
-						? defaultPallete
-						: createPallete(palletes[pallete]);
+					localStorage.setItem("pallete", value);
+					fire.pallete = resolvePallete(value);
 				},
 			};
-			pane.addButton({ title: "Start" }).on("click", () => fire.start());
-			pane.addButton({ title: "Stop" }).on("click", () => fire.stop());
-			pane.addButton({ title: "Reset" }).on("click", () => fire.reset());
+			pane.addButton({ title: "Start" }).on("click", fire.start);
+			pane.addButton({ title: "Stop" }).on("click", fire.stop);
+			pane.addButton({ title: "Reset" }).on("click", fire.reset);
 			pane.addBinding(PARAMS, "interval", { min: 10, max: 100 });
 			pane.addBinding(PARAMS, "pallete", {
 				options: Object.fromEntries(
-					Object.keys(palletes).map((k) => [k, k]),
+					Object.keys(PALLETES).map((k) => [k, k]),
 				),
 			});
 		}
+
 	</script>
 </html>

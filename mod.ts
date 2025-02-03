@@ -15,7 +15,8 @@ export type Color = [r: number, g: number, b: number, a?: number];
 export type ColorPallete = ReadonlyArray<Color>;
 
 // @deno-fmt-ignore
-const DEFAULT_PALLETE = [
+/** @internal */
+export const DEFAULT_PALLETE = [
   [0x07,0x07,0x07],
   [0x1F,0x07,0x07],
   [0x2F,0x0F,0x07],
@@ -263,7 +264,7 @@ export default function burn(
 	options: BurnOptions = {},
 ): BurnAnimation {
 	let { scale = 3.5, interval = 30, pallete = DEFAULT_PALLETE } = options;
-	let id: number | null = null;
+	let id: number | undefined = undefined;
 	let renderer = new Renderer(canvas, { scale, pallete });
 
 	function animate() {
@@ -275,13 +276,11 @@ export default function burn(
 
 	let animation = {
 		start() {
-			if (id !== null) return;
-			animate();
+			if (!id) animate();
 		},
 		stop() {
-			if (id === null) return;
 			clearTimeout(id);
-			id = null;
+			id = undefined;
 		},
 		reset() {
 			renderer.reset();
