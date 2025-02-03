@@ -1,5 +1,7 @@
 # @manzt/burn
 
+[![JSR](https://jsr.io/badges/@manzt/burn)](https://jsr.io/@manzt/burn)
+
 a DOOM-like fire effect for a HTML5 canvas
 
 ## usage
@@ -28,5 +30,5 @@ the source code is formatted, linted, and type-checked with deno
 ```ts
 deno fmt
 deno lint
-deno check burn.js
+deno check mod.ts
 ```
