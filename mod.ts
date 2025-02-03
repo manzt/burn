@@ -103,7 +103,7 @@ class Renderer {
 		this.#pallete = update;
 	}
 
-	#spread(from: number): void {
+	#spreadFire(from: number): void {
 		if (from < this.#width) {
 			return;
 		}
@@ -125,7 +125,7 @@ class Renderer {
 	update(): void {
 		for (let x = 0; x < this.#width; x++) {
 			for (let y = 1; y < this.#height; y++) {
-				this.#spread(y * this.#width + x);
+				this.#spreadFire(y * this.#width + x);
 			}
 		}
 	}
@@ -262,12 +262,7 @@ export default function burn(
 	canvas: HTMLCanvasElement,
 	options: BurnOptions = {},
 ): BurnAnimation {
-	let {
-		scale = 3.5,
-		interval = 30,
-		pallete = DEFAULT_PALLETE,
-	} = options;
-
+	let { scale = 3.5, interval = 30, pallete = DEFAULT_PALLETE } = options;
 	let id: number | null = null;
 	let renderer = new Renderer(canvas, { scale, pallete });
 

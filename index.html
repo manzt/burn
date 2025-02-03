@@ -32,8 +32,9 @@
 					return [r, g, b];
 				});
 
-		let pallete = "inferno";
+		let pallete = "doom";
 		let palletes = {
+			doom: null,
 			blues: d3.interpolateBlues,
 			greens: d3.interpolateGreens,
 			inferno: d3.interpolateInferno,
@@ -43,9 +44,8 @@
 
 		let canvas = document.querySelector("canvas");
 		canvas.width = document.querySelector("body").clientWidth;
-		let fire = globalThis.fire = burn(canvas, {
-			pallete: createPallete(palletes[pallete]),
-		});
+		let fire = globalThis.fire = burn(canvas);
+		let defaultPallete = fire.pallete;
 
 		{
 			let pane = new Pane();
@@ -61,7 +61,9 @@
 				},
 				set pallete(value) {
 					pallete = value;
-					fire.pallete = createPallete(palletes[pallete]);
+					fire.pallete = value === "doom"
+						? defaultPallete
+						: createPallete(palletes[pallete]);
 				},
 			};
 			pane.addButton({ title: "Start" }).on("click", () => fire.start());
