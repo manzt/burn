@@ -14,13 +14,13 @@
 	</head>
 	<body id="root"></body>
 	<script type="module">
-		let { default: burn } = await import("./mod.ts").catch(err => {
+		let { default: burn } = await import("./mod.ts").catch((err) => {
 			console.warn(
 				"Vite dev server is not running. Falling back to the CDN version: `https://esm.sh/gh/manzt/burn/mod.ts`.\n\n" +
-				"Ensure Vite is running if you intended to use the local development build."
+					"Ensure Vite is running if you intended to use the local development build.",
 			);
 			return import("https://esm.sh/gh/manzt/burn/mod.ts");
-		})
+		});
 
 		let canvas = document.createElement("canvas");
 		canvas.width = root.clientWidth;

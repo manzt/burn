@@ -1,12 +1,10 @@
 /**
  * A DOOM-like fire effect for a canvas.
  *
- * It overlays an animated burn effect on a given HTMLElement.
- *
  * ```ts
  * import burn from "@manzt/burn";
  *
- * burn(document.querySelector("#target"));
+ * burn(document.querySelector("canvas"));
  * ```
  *
  * @module
@@ -198,7 +196,7 @@ export interface BurnOptions {
 /**
  * The API returned from the {@link burn} method.
  */
-export interface BurnController {
+export interface BurnAnimation {
 	/**
 	 * Starts the animation if it was previously stopped.
 	 */
@@ -227,18 +225,43 @@ export interface BurnController {
  * DOOM-like burn effect for a canvas.
  *
  * Implements a simple palette-based heat propagation model.
- *
  * @see https://fabiensanglard.net/doom_fire_psx
  *
- * @param canvas - A canvas element to render the simulation.
- * @param options - Options bag for with options for rendering
+ * @example
+ * ```ts
+ * import burn from "@manzt/burn";
  *
- * @returns {BurnController}
+ * burn(document.querySelector("canvas"));
+ * ```
+ *
+ * @example
+ * ```ts
+ * import burn from "@manzt/burn";
+ * import * as d3 from "d3";
+ *
+ * let animation = burn(document.querySelector("canvas"), {
+ *   pallete: Array
+ *     .from({ length: 37 }, (_, i) => d3.interpolateViridis(i / 36))
+ *     .map(color => {
+ *       let { r, g, b } = d3.color(color)!;
+ *       return [r, g, b] as const;
+ *     });
+ * })
+ *
+ * animation.interval = 100 // slow down animation
+ * animation.stop();  // stop animation
+ * animation.start(); // resume animation
+ * animation.reset(); // reset
+ * ```
+ *
+ * @param canvas A canvas element to render the simulation.
+ * @param options Options bag for with options for rendering
+ * @returns A controller for the animation
  */
 export default function burn(
 	canvas: HTMLCanvasElement,
 	options: BurnOptions = {},
-): BurnController {
+): BurnAnimation {
 	let {
 		scale = 3.5,
 		interval = 30,
@@ -255,7 +278,7 @@ export default function burn(
 		id = setTimeout(animate, interval);
 	}
 
-	let controller = {
+	let animation = {
 		start() {
 			if (id !== null) return;
 			animate();
@@ -280,8 +303,8 @@ export default function burn(
 		set interval(update) {
 			interval = update;
 		},
-	} satisfies BurnController;
+	} satisfies BurnAnimation;
 
-	controller.start();
-	return controller;
+	animation.start();
+	return animation;
 }

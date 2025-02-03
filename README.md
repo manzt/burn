@@ -7,7 +7,7 @@ a DOOM-like fire effect for a HTML5 canvas
 ```ts
 import burn from "jsr:@manzt/burn";
 
-burn(document.querySelector("#element"));
+burn(document.querySelector("canvas"));
 ```
 
 ![DOOM fire effect](https://github.com/user-attachments/assets/41b92877-71e0-410e-94bb-732b4e63625b)
