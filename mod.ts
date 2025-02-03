@@ -1,22 +1,22 @@
 /**
- * This module contains a DOOM-like fire effect for a canvas.
+ * A DOOM-like fire effect for a canvas.
  *
  * It overlays an animated burn effect on a given HTMLElement.
  *
- * @module
- *
- * @example
  * ```ts
  * import burn from "@manzt/burn";
  *
  * burn(document.querySelector("#target"));
  * ```
+ *
+ * @module
  */
 
-/** @import { ColorPallete, Color, BurnController, BurnOptions } from "./types.ts" */
+export type Color = [r: number, g: number, b: number, a?: number];
+
+export type ColorPallete = ReadonlyArray<Color>;
 
 // @deno-fmt-ignore
-/** @satisfies {ColorPallete} */
 const DEFAULT_PALLETE = [
   [0x07,0x07,0x07],
   [0x1F,0x07,0x07],
@@ -55,74 +55,57 @@ const DEFAULT_PALLETE = [
   [0xDF,0xDF,0x9F],
   [0xEF,0xEF,0xC7],
   [0xFF,0xFF,0xFF]
-];
+] satisfies ColorPallete;
 
 class Renderer {
-	/** @type {number} */
-	#scale;
-	/** @type {ColorPallete} */
-	#pallete;
+	#scale: number;
+	#pallete: ColorPallete;
 
-	/** @type {HTMLCanvasElement} */
-	#canvas;
-	/** @type {CanvasRenderingContext2D} */
-	#ctx;
-	/** @type {HTMLCanvasElement} */
-	#offscreenCanvas;
-	/** @type {CanvasRenderingContext2D} */
-	#offscreenCtx;
+	#canvas: HTMLCanvasElement;
+	#ctx: CanvasRenderingContext2D;
+	#offscreenCanvas: HTMLCanvasElement;
+	#offscreenCtx: CanvasRenderingContext2D;
 
-	/** @type {Uint8Array} */
-	#pixels;
+	#pixels: Uint8Array;
 
-	/**
-	 * @param {HTMLCanvasElement} canvas
-	 * @param {{ scale: number, pallete: ColorPallete }} options
-	 */
-	constructor(canvas, options) {
+	constructor(
+		canvas: HTMLCanvasElement,
+		options: { scale: number; pallete: ColorPallete },
+	) {
 		this.#scale = options.scale;
 		this.#pallete = options.pallete;
 
 		this.#canvas = canvas;
-		this.#ctx =
-			/** @type {CanvasRenderingContext2D} */ (canvas.getContext("2d"));
+		this.#ctx = canvas.getContext("2d")!;
 		this.#ctx.imageSmoothingEnabled = false;
 
 		this.#offscreenCanvas = document.createElement("canvas");
-		this.#offscreenCtx =
-			/** @type {CanvasRenderingContext2D} */ (this.#offscreenCanvas.getContext(
-				"2d",
-			));
+		this.#offscreenCtx = this.#offscreenCanvas.getContext("2d")!;
 
 		this.#pixels = new Uint8Array(this.#width * this.#height);
 		this.reset();
 	}
 
-	/** @type {number} */
-	get #width() {
+	get #width(): number {
 		return Math.floor(this.#canvas.width / this.#scale);
 	}
 
-	/** @type {number} */
-	get #height() {
+	get #height(): number {
 		return Math.floor(this.#canvas.height / this.#scale);
 	}
 
-	/** @type {ColorPallete} */
-	get pallete() {
+	get pallete(): ColorPallete {
 		return this.#pallete;
 	}
 
-	/** @param {ColorPallete} update */
-	set pallete(update) {
+	set pallete(update: ColorPallete) {
 		if (update.length !== 37) {
 			throw TypeError("Color pallette must be 37 elements.");
 		}
 		this.#pallete = update;
 	}
 
-	/** @param {number} from */
-	#spread(from) {
+	#spread(from: number): void {
 		if (from < this.#width) {
 			return;
 		}
@@ -131,7 +114,7 @@ class Renderer {
 		this.#pixels[to] = Math.max(this.#pixels[from] - decay, 0);
 	}
 
-	reset() {
+	reset(): void {
 		// clear pixels
 		this.#pixels = new Uint8Array(this.#width * this.#height);
 		this.#pixels.fill(0);
@@ -141,7 +124,7 @@ class Renderer {
 		this.render();
 	}
 
-	update() {
+	update(): void {
 		for (let x = 0; x < this.#width; x++) {
 			for (let y = 1; y < this.#height; y++) {
 				this.#spread(y * this.#width + x);
@@ -149,7 +132,7 @@ class Renderer {
 		}
 	}
 
-	render() {
+	render(): void {
 		// render off screen
 		this.#offscreenCanvas.width = this.#width;
 		this.#offscreenCanvas.height = this.#height;
@@ -185,6 +168,61 @@ class Renderer {
 	}
 }
 
+/** The options bag to pass to the {@link burn} method. */
+export interface BurnOptions {
+	/**
+	 * Scaling factor for the effect, determining pixel size.
+	 * Higher values create a blockier, more pixelated effect.
+	 *
+	 * @default 3.5
+	 */
+	scale?: number;
+	/**
+	 * The interval between renders in milliseconds.
+	 *
+	 * @default 30
+	 */
+	interval?: number;
+	/**
+	 * Initial height of the effect. If not specified,
+	 * adapts to the element size.
+	 */
+	height?: number;
+	/**
+	 * Color palette used for rendering the effect.
+	 * Must contain exactly 37 colors.
+	 */
+	pallete?: ColorPallete;
+}
+
+/**
+ * The API returned from the {@link burn} method.
+ */
+export interface BurnController {
+	/**
+	 * Starts the animation if it was previously stopped.
+	 */
+	start(): void;
+	/**
+	 * Stops the animation loop, pausing the effect.
+	 */
+	stop(): void;
+	/**
+	 * Resets the renderer, clearing and reinitializing the effect.
+	 * Useful after resizing or changing parameters.
+	 */
+	reset(): void;
+	/**
+	 * The color palette used for rendering.
+	 * Must be an array of 37 RGB color values.
+	 */
+	pallete: ColorPallete;
+	/**
+	 * The interval between renders in milliseconds.
+	 */
+	interval: number;
+}
+
 /**
  * DOOM-like burn effect for a canvas.
  *
@@ -192,20 +230,22 @@ class Renderer {
  *
  * @see https://fabiensanglard.net/doom_fire_psx
  *
- * @param {HTMLCanvasElement} canvas - A canvas element to render the simulation.
- * @param {BurnOptions} options - Options bag for with options for rendering
+ * @param canvas - A canvas element to render the simulation.
+ * @param options - Options bag for with options for rendering
  *
  * @returns {BurnController}
  */
-export default function burn(canvas, options = {}) {
+export default function burn(
+	canvas: HTMLCanvasElement,
+	options: BurnOptions = {},
+): BurnController {
 	let {
 		scale = 3.5,
 		interval = 30,
 		pallete = DEFAULT_PALLETE,
 	} = options;
 
-	/** @type {number | null} */
-	let id = null;
+	let id: number | null = null;
 	let renderer = new Renderer(canvas, { scale, pallete });
 
 	function animate() {
@@ -215,8 +255,7 @@ export default function burn(canvas, options = {}) {
 		id = setTimeout(animate, interval);
 	}
 
-	/** @satisfies {BurnController} */
-	const controller = {
+	let controller = {
 		start() {
 			if (id !== null) return;
 			animate();
@@ -241,7 +280,7 @@ export default function burn(canvas, options = {}) {
 		set interval(update) {
 			interval = update;
 		},
-	};
+	} satisfies BurnController;
 
 	controller.start();
 	return controller;
